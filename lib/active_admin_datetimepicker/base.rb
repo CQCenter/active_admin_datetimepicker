@@ -26,15 +26,17 @@ module ActiveAdminDatetimepicker
 
     def input_value(input_name = nil)
       val = object.public_send(input_name || method)
-      if val.is_a?(Date) || val.is_a?(DateTime) || val.is_a?(Time)
-        val
+      if val.is_a?(Date)
+        val.strftime(format)
+      elsif val.is_a?(DateTime) || val.is_a?(Time)
+        format_datetime_with_timezone(val, format)
       else
         parse_datetime(val)
       end
     end
 
     def parse_datetime(val)
-      DateTime.parse(val.to_s).strftime(format)
+      DateTime.parse(val.to_s).in_time_zone.strftime(format)
     rescue ArgumentError
       nil
     end
@@ -47,6 +49,14 @@ module ActiveAdminDatetimepicker
         options = Hash[options.map { |k, v| [k.to_s.camelcase(:lower), v] }]
         _default_datetime_picker_options.merge(options)
       end
+    end
+
+    private
+
+    def format_datetime_with_timezone(datetime, format)
+      # Format the datetime but retain the timezone information
+      timezone = datetime.time_zone
+      datetime.strftime(format).in_time_zone(timezone)
     end
 
     protected
