@@ -31,9 +31,16 @@ module ActiveAdminDatetimepicker
 
     def format_datetime(val)
       return val unless val.respond_to?(:strftime)
-      val.strftime(format)
-    rescue ArgumentError
-      nil
+      
+      begin
+        formatted_val = val.strftime(format)
+        Rails.logger.info "Formatted datetime value: #{formatted_val}"
+        formatted_val
+      rescue ArgumentError => e
+        Rails.logger.error "Error formatting datetime: #{e.message}"
+        Rails.logger.error "Value causing error: #{val.inspect}"
+        nil
+      end
     end
 
     def datetime_picker_options
