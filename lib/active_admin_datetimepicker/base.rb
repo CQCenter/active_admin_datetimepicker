@@ -26,7 +26,11 @@ module ActiveAdminDatetimepicker
 
     def input_value(input_name = nil)
       val = object.public_send(input_name || method)
-      val.is_a?(Date) ? val : parse_datetime(val)
+      if val.is_a?(Date) || val.is_a?(DateTime) || val.is_a?(Time)
+        val
+      else
+        parse_datetime(val)
+      end
     end
 
     def parse_datetime(val)
